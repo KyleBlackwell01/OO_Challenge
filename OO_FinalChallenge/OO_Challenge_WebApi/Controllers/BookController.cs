@@ -5,41 +5,43 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.SqlClient;
+using OO_Challenge_WebApi.Models;
 
 namespace OO_Challenge_WebApi.Controllers
 {
     public class BookController : ApiController
     {
         // GET: api/Book
-        public IEnumerable<string> Get()
+        public IEnumerable<BooksModel> Get()
         {
             SqlConnection conn = DBConnection.GetConnection();
             SqlCommand cmd;
             SqlDataReader rdr;
             String query;
-            List<String> output = new List<string>();
+            List<BooksModel> output = new List<BooksModel>();
 
             try
             {
                 conn.Open();
 
 
-                query = "select * from Books";
+                query = "select isbn, title from Books";
                 cmd = new SqlCommand(query, conn);
 
                 rdr = cmd.ExecuteReader();
 
                 while (rdr.Read())
                 {
-                    output.Add("{ISBN: " + rdr.GetValue(0)
-                                 + ", title: " + rdr.GetValue(1) + "}");
+                    output.Add(new BooksModel(Int32.Parse(rdr["isbn"].ToString()),
+                        rdr["title"].ToString()));
                 }
 
             }
             catch (Exception e)
             {
                 output.Clear();
-                output.Add(e.Message);
+                throw e;
+                //output.Add();
 
             }
             finally

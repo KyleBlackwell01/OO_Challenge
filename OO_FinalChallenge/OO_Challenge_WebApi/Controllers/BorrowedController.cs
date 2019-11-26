@@ -5,42 +5,44 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.SqlClient;
+using OO_Challenge_WebApi.Models;
 
 namespace OO_Challenge_WebApi.Controllers
 {
     public class BorrowedController : ApiController
     {
         // GET: api/Borrowed
-        public IEnumerable<string> Get()
+        public IEnumerable<BooksBorrowedModel> Get()
         {
             SqlConnection conn = DBConnection.GetConnection();
             SqlCommand cmd;
             SqlDataReader rdr;
             String query;
-            List<String> output = new List<string>();
+            List<BooksBorrowedModel> output = new List<BooksBorrowedModel>();
 
             try
             {
                 conn.Open();
 
 
-                query = "select * from Books where borrower is not null ";
+                query = "select isbn, title, borrower from Books where borrower is not null";
                 cmd = new SqlCommand(query, conn);
 
                 rdr = cmd.ExecuteReader();
 
                 while (rdr.Read())
                 {
-                    output.Add("{ISBN: " + rdr.GetValue(0)
-                                 + ", title: " + rdr.GetValue(1) + ""
-                                 + ", borrower: " + rdr.GetValue(3) + "}");
+                    output.Add(new BooksBorrowedModel(Int32.Parse(rdr["isbn"].ToString()),
+                        rdr["title"].ToString(),
+                        Int32.Parse(rdr["borrower"].ToString())));
                 }
 
             }
             catch (Exception e)
             {
                 output.Clear();
-                output.Add(e.Message);
+                throw e;
+                //output.Add(e.Message);
 
             }
             finally
@@ -55,13 +57,17 @@ namespace OO_Challenge_WebApi.Controllers
         }
 
         // GET: api/Borrowed/5
-        public string Get(int id)
+        public IEnumerable<BooksBorrowedModel> Get(int id)
         {
             SqlConnection conn = DBConnection.GetConnection();
             SqlCommand cmd;
             SqlDataReader rdr;
             String query;
-            String output = "";
+            List<BooksBorrowedModel> output = new List<BooksBorrowedModel>();
+
+            int output1 = 0;
+            string output2 = "";
+            int output3 = 0;
 
             try
             {
@@ -75,16 +81,19 @@ namespace OO_Challenge_WebApi.Controllers
 
                 while (rdr.Read())
                 {
-                    output = output + ("{ISBN: " + rdr.GetValue(0)
-                                 + ", title: " + rdr.GetValue(1) + ""
-                                 + ", PK: " + rdr.GetValue(3) + "}");
+                    output1 = Int32.Parse(rdr["isbn"].ToString());
+                    output2 = rdr["title"].ToString();
+                    output3 = Int32.Parse(rdr["borrower"].ToString());
+
+                    output.Add(new BooksBorrowedModel(output1, output2, output3));
+
+
                 }
 
             }
             catch (Exception e)
             {
-                output = "";
-                output = output + e.Message;
+                throw e;
             }
             finally
             {

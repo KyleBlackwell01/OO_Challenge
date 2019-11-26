@@ -5,19 +5,20 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.SqlClient;
+using OO_Challenge_WebApi.Models;
 
 namespace OO_Challenge_WebApi.Controllers
 {
     public class NotBorrowedController : ApiController
     {
         // GET: api/NotBorrowed
-        public IEnumerable<string> Get()
+        public IEnumerable<BooksModel> Get()
         {
             SqlConnection conn = DBConnection.GetConnection();
             SqlCommand cmd;
             SqlDataReader rdr;
             String query;
-            List<String> output = new List<string>();
+            List<BooksModel> output = new List<BooksModel>();
 
             try
             {
@@ -31,15 +32,15 @@ namespace OO_Challenge_WebApi.Controllers
 
                 while (rdr.Read())
                 {
-                    output.Add("{ISBN: " + rdr.GetValue(0)
-                                 + ", title: " + rdr.GetValue(1) + "}");
+                    output.Add(new BooksModel(Int32.Parse(rdr["isbn"].ToString()),
+                        rdr["title"].ToString()));
                 }
 
             }
             catch (Exception e)
             {
                 output.Clear();
-                output.Add(e.Message);
+                throw e;
 
             }
             finally
